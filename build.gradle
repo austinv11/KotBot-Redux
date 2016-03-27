@@ -1,0 +1,41 @@
+buildscript {
+    ext.kotlin_version = '1.0.0'
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+apply plugin: 'kotlin'
+apply plugin: 'idea'
+apply plugin: 'application'
+
+mainClassName = 'kotbot.KotBotKt'
+
+defaultTasks 'run'
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven {
+        url  "https://jitpack.io" //Used for Discord4J
+    }
+}
+
+dependencies {
+    //Kotlin runtimes:
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    //The actual Discord api:
+    compile "com.github.austinv11:Discord4j:2.4.0:shaded"
+    //Used for web services:
+    compile "com.sparkjava:spark-core:2.3"
+    compile "com.mashape.unirest:unirest-java:1.4.7"
+    
+    //Standard testing:
+    testCompile 'junit:junit:4.11'
+    //Kotlin junit extension:
+    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+}
