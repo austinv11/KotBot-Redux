@@ -26,6 +26,10 @@ class Config {
      * The user id of the owner.
      */
     var OWNER = ""
+    /**
+     * The bot oauth invite link
+     */
+    var INVITE_LINK = ""
     
     /**
      * Saves the current version of the config into a file
