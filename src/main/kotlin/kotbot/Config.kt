@@ -18,6 +18,14 @@ class Config {
      * The names of loggers to filter
      */
     var FILTERED_LOGGERS = arrayOf("org.eclipse.jetty")
+    /**
+     * The prefix for commands (Note, an @mention in the beginning of the message is always a valid prefix).
+     */
+    var PREFIX = "~"
+    /**
+     * The user id of the owner.
+     */
+    var OWNER = ""
     
     /**
      * Saves the current version of the config into a file

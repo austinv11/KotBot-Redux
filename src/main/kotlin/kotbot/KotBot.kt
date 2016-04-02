@@ -22,6 +22,7 @@ import sx.blah.discord.api.IDiscordClient
 import sx.blah.discord.api.IListener
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent
 import sx.blah.discord.handle.impl.events.ReadyEvent
+import sx.blah.discord.handle.obj.IUser
 import sx.blah.discord.modules.ModuleLoader
 import sx.blah.discord.util.DiscordException
 import java.io.File
@@ -47,10 +48,11 @@ fun main(args: Array<String>) {
     
     initLifcycleListeners()
     
-    //So that the config file is saved at shut down in case of changes while running
+    //Handles cleanup
     Runtime.getRuntime().addShutdownHook(object: Thread() {
         override fun run() {
-            KotBot.CONFIG.save()
+            KotBot.CONFIG.save()//So that the config file is saved at shut down in case of changes while running
+            BaseModule.ASYNC_EXECUTOR.shutdownNow()
         }
     })
     
@@ -161,7 +163,10 @@ class KotBot {
         final val CONFIG_FILE = File("./config.json")
         final val CONFIG = if (CONFIG_FILE.exists()) GSON.fromJson<Config>(CONFIG_FILE.reader()) else Config()
         const val VERSION = "1.0.0"
-        const val AUTHOR = "Austin#9067"
+        val OWNER_NAME: String
+            get() {return "${OWNER.name}#${OWNER.discriminator}"}
+        val OWNER: IUser
+            get() {return CLIENT.getUserByID(CONFIG.OWNER)!!}
         
         init {
             CONFIG.save() //Ensures that a config file is always at least present.

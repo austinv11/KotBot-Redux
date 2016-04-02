@@ -18,7 +18,7 @@ defaultTasks 'run'
 
 repositories {
     mavenCentral()
-    jcenter()
+    jcenter() //Fixes Discord4J transitive dependencies
     maven {
         url  "https://jitpack.io" //Used for Discord4J
     }
@@ -29,7 +29,7 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     //The actual Discord api:
-    compile "com.github.austinv11:Discord4j:2.4.1:shaded"
+    compile "com.github.austinv11:Discord4j:master-SNAPSHOT"
     //Used for web services:
     compile "com.sparkjava:spark-core:2.3"
     compile "com.mashape.unirest:unirest-java:1.4.7"
