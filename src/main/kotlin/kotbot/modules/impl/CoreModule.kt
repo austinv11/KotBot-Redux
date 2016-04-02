@@ -91,9 +91,10 @@ class CoreModule : BaseModule() {
                 if (localRepoDir.exists())
                     localRepoDir.deleteRecursively()
                 ProcessBuilder("git", "clone", "https://github.com/austinv11/KotBot-Redux.git").inheritIO().directory(gitDir).start().waitFor()
+                localRepoDir.deleteOnExit()
                 KotBot.LOGGER.info("Git repo cloned, building KotBot...")
                 ProcessBuilder("./gradlew", "installShadowApp").inheritIO().directory(localRepoDir).start().waitFor()
-                val newJar = File("./kotbot-git/build/libs/KotBot-all.jar")
+                val newJar = File("./kotbot-git/KotBot-Redux/build/libs/KotBot-all.jar")
                 val oldJar = File("./KotBot.jar")
                 if (!oldJar.exists()) {
                     KotBot.LOGGER.warn("KotBot jar not found! Creating placeholder...")
