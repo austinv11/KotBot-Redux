@@ -164,6 +164,7 @@ class KotBot {
         final val CONFIG = if (CONFIG_FILE.exists()) GSON.fromJson<Config>(CONFIG_FILE.reader()) else Config()
         const val VERSION = "1.0.0-SNAPSHOT"
         const val KOTLIN_VERSION = "1.0.0"
+        const val INVITE_LINK = "https://discordapp.com/oauth2/authorize?client_id=160838378311385090&scope=bot"
         val OWNER_NAME: String
             get() {return if (INSTANCE.client != null) "${OWNER.name}#${OWNER.discriminator}" else "Austin"}
         val OWNER: IUser

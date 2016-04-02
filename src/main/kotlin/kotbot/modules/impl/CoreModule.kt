@@ -25,6 +25,7 @@ class CoreModule : BaseModule() {
                 builder.add("KotBot v${KotBot.VERSION}")
                 builder.add("--------${StringBuilder().padEnd(KotBot.VERSION.length, '-')}")
                 builder.add("KotBot is a bot written in Kotlin built on top of the Discord4J library.")
+                builder.add("Invite link: ${KotBot.INVITE_LINK}")
                 builder.add("Github: https://github.com/austinv11/KotBot-Redux")
                 builder.add("Prefix: \"${KotBot.CONFIG.PREFIX}\" or @${KotBot.CLIENT.ourUser.name}#" +
                         "${KotBot.CLIENT.ourUser.discriminator}")
