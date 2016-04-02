@@ -17,9 +17,8 @@ import java.util.concurrent.Future
  */
 abstract class BaseModule : IModule {
     
-    private var commands = mapOf<Array<String>, Command>()
-    
     companion object {
+        var commands = mutableMapOf<List<String>, Pair<BaseModule, Command>>()
         final val ASYNC_EXECUTOR = Executors.newCachedThreadPool() //This is used for executing commands asynchronously
         var lastAsyncCommands = mutableMapOf<IChannel, Pair<Command, Future<*>>>() //Keeps track of async commands
     }
@@ -45,9 +44,10 @@ abstract class BaseModule : IModule {
      */
     fun registerCommands(vararg commands: Command) {
         for (command in commands) {
-            val names = arrayOf(command.name)
-            names + command.aliases
-            this.commands + Pair(names, command)
+            val names = mutableListOf(command.name)
+            names.addAll(command.aliases)
+            BaseModule.commands.put(names, Pair(this, command))
+            KotBot.LOGGER.trace("Registered command ${command.name}")
         }
     }
     
@@ -56,7 +56,7 @@ abstract class BaseModule : IModule {
         val stringBuilder = StringBuilder()
         
         for (letter in name.asIterable()) {
-            if (stringBuilder.isEmpty() && letter.isUpperCase()) {
+            if (!stringBuilder.isEmpty() && letter.isUpperCase()) {
                 stringBuilder.append(" ")
             }
             stringBuilder.append(letter)
@@ -78,12 +78,11 @@ abstract class BaseModule : IModule {
         }
         
         val commandName = if (cleanedMessage.contains(" ")) cleanedMessage.split(" ")[0] else cleanedMessage
-        val possibleCommands = commands.filter { it.key.contains(commandName) }.values
-        if (possibleCommands.size > 1)
-            KotBot.LOGGER.warn("Multiple possible commands found for '$commandName'")
-        val command = possibleCommands.firstOrNull()
-        
-        if (command == null) {
+        cleanedMessage = cleanedMessage.removePrefix(commandName).trim()
+        val command: Command
+        try {
+            command = commands.filter { it.key.contains(commandName) }.values.firstOrNull()!!.second
+        } catch(e: NullPointerException) {
             event.message.channel.sendMessage(formatErrorMessage("Command `$commandName` not found!"))
             return
         }
@@ -103,12 +102,14 @@ abstract class BaseModule : IModule {
             if (!event.message.channel.isPrivate)
                 DiscordUtils.checkPermissions(KotBot.CLIENT, event.message.channel, command.permissionsRequired)
 
-            var args: List<String>
+            var args: MutableList<String>?
             if (cleanedMessage.contains(" ")) {
-                args = cleanedMessage.split(" ")
-                args = args.drop(1)
+                args = cleanedMessage.split(" ").toMutableList()
+                args = args.drop(1).toMutableList()
+            } else if (!cleanedMessage.isEmpty()) {
+                args = mutableListOf(cleanedMessage)
             } else {
-                args = listOf()
+                args = null
             }
             
             if (command.async) {
@@ -131,7 +132,7 @@ abstract class BaseModule : IModule {
                     }
                 }
                 
-                lastAsyncCommands + Pair(event.message.channel, Pair(command, commandFuture))
+                lastAsyncCommands.put(event.message.channel, Pair(command, commandFuture))
                 
             } else {
                 val result = command.execute(event.message, generateArgs(args))
@@ -162,22 +163,24 @@ abstract class BaseModule : IModule {
         return true
     }
     
-    fun generateArgs(args: List<String>): Array<Any> {
-        var newArgs = arrayOf<Any>()
+    fun generateArgs(args: List<String>?): List<Any> {
+        var newArgs = mutableListOf<Any>()
         
-        for (string in args) {
-            if (string.equals("true", true) || string.equals("false", true)) {
-                newArgs + string.toBoolean()
-                continue
-            }
-            try {
-                if (string.contains('.')) {
-                    newArgs + string.toDouble()
-                } else {
-                    newArgs + string.toInt()
+        if (args != null) {
+            for (string in args) {
+                if (string.equals("true", true) || string.equals("false", true)) {
+                    newArgs.add(string.toBoolean())
+                    continue
                 }
-            } catch(e: NumberFormatException) {
-                newArgs + string
+                try {
+                    if (string.contains('.')) {
+                        newArgs.add(string.toDouble())
+                    } else {
+                        newArgs.add(string.toInt())
+                    }
+                } catch(e: NumberFormatException) {
+                    newArgs.add(string)
+                }
             }
         }
         

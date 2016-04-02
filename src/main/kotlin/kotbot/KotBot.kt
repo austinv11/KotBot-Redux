@@ -162,9 +162,10 @@ class KotBot {
         final val GSON = GsonBuilder().serializeNulls().setPrettyPrinting().create()
         final val CONFIG_FILE = File("./config.json")
         final val CONFIG = if (CONFIG_FILE.exists()) GSON.fromJson<Config>(CONFIG_FILE.reader()) else Config()
-        const val VERSION = "1.0.0"
+        const val VERSION = "1.0.0-SNAPSHOT"
+        const val KOTLIN_VERSION = "1.0.0"
         val OWNER_NAME: String
-            get() {return "${OWNER.name}#${OWNER.discriminator}"}
+            get() {return if (INSTANCE.client != null) "${OWNER.name}#${OWNER.discriminator}" else "Austin"}
         val OWNER: IUser
             get() {return CLIENT.getUserByID(CONFIG.OWNER)!!}
         

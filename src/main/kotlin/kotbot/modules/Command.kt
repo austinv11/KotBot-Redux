@@ -16,5 +16,5 @@ abstract class Command(val name: String, val aliases: Array<String>, val descrip
     /**
      * This is called when the command is executed.
      */
-    abstract fun execute(message: IMessage, vararg args: Any): String?
+    abstract fun execute(message: IMessage, args: List<Any>): String?
 }
