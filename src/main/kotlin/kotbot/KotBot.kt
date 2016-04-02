@@ -146,7 +146,7 @@ private fun initRESTServer() {
 /**
  * Shuts down this bot.
  */
-private fun shutdown() {
+fun shutdown() {
     KotBot.LOGGER.info("Shutdown request received, shutting down...")
     KotBot.CLIENT.logout()
     Server.stop()

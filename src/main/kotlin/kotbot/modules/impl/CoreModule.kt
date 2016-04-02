@@ -5,6 +5,7 @@ import kotbot.modules.BaseModule
 import kotbot.modules.Command
 import kotbot.modules.CommandException
 import kotbot.modules.CommandPermissionLevels
+import kotbot.shutdown
 import sx.blah.discord.Discord4J
 import sx.blah.discord.api.IDiscordClient
 import sx.blah.discord.handle.obj.IMessage
@@ -114,6 +115,12 @@ class CoreModule : BaseModule() {
                 KotBot.LOGGER.info("KotBot built and replaced, running...")
                 ProcessBuilder("java", "-jar", "./KotBot.jar", "${KotBot.CLIENT.token.removePrefix("Bot ")}").inheritIO().start()
                 return "Launched new instance!"
+            }
+
+        }, object: Command("kill", arrayOf("rip", "die", "diepleasedie"), "Kills the bot RIP.", "", CommandPermissionLevels.OWNER) {
+            override fun execute(message: IMessage, args: List<Any>): String? {
+                shutdown()
+                return "Shutting down..." //You shouldn't see this
             }
 
         })
