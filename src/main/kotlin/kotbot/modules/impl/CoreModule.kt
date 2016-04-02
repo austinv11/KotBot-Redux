@@ -4,9 +4,11 @@ import kotbot.KotBot
 import kotbot.modules.BaseModule
 import kotbot.modules.Command
 import kotbot.modules.CommandException
+import kotbot.modules.CommandPermissionLevels
 import sx.blah.discord.Discord4J
 import sx.blah.discord.api.IDiscordClient
 import sx.blah.discord.handle.obj.IMessage
+import java.io.File
 import java.util.*
 
 /**
@@ -15,7 +17,7 @@ import java.util.*
 class CoreModule : BaseModule() {
     
     override fun enable(client: IDiscordClient): Boolean {
-        registerCommands(object: Command("info", arrayOf("i", "about"), "Displays general information about this bot", "") {
+        registerCommands(object: Command("info", arrayOf("i", "about"), "Displays general information about this bot.", "") {
             override fun execute(message: IMessage, args: List<Any>): String? {
                 var builder = StringJoiner("\n")
                 builder.add("```")
@@ -35,7 +37,7 @@ class CoreModule : BaseModule() {
                 builder.add("```")
                 return builder.toString()
             }
-        }, object: Command("help", arrayOf("?", "h"), "Displays a list of commands as well as information on how to use them",
+        }, object: Command("help", arrayOf("?", "h"), "Displays a list of commands as well as information on how to use them.",
                 "optional:[command name]") {
             override fun execute(message: IMessage, args: List<Any>): String? {
                 val joiner = StringJoiner("\n")
@@ -73,6 +75,44 @@ class CoreModule : BaseModule() {
                     }
                 }
                 return joiner.toString()
+            }
+
+        }, object: Command("update", arrayOf("up", "compile"), 
+                "Clones the git repo for this bot and then compiles and launches the latest version.", "", 
+                CommandPermissionLevels.OWNER, async = true) {
+            override fun execute(message: IMessage, args: List<Any>): String? {
+                KotBot.LOGGER.info("Request to recompile received, ensuring git is installed...")
+                ProcessBuilder("git", "--version").inheritIO().start().waitFor() //Ensures git is installed
+                KotBot.LOGGER.info("Git installed, cloning the KotBot repo...")
+                val gitDir = File("./kotbot-git/")
+                val localRepoDir = File("./kotbot-git/KotBot-Redux/")
+                if (!gitDir.exists())
+                    gitDir.mkdir()
+                if (localRepoDir.exists())
+                    localRepoDir.deleteRecursively()
+                ProcessBuilder("git", "clone", "https://github.com/austinv11/KotBot-Redux.git").inheritIO().directory(gitDir).start().waitFor()
+                KotBot.LOGGER.info("Git repo cloned, building KotBot...")
+                ProcessBuilder("./gradlew", "installShadowApp").inheritIO().directory(localRepoDir).start().waitFor()
+                val newJar = File("./kotbot-git/build/libs/KotBot-all.jar")
+                val oldJar = File("./KotBot.jar")
+                if (!oldJar.exists()) {
+                    KotBot.LOGGER.warn("KotBot jar not found! Creating placeholder...")
+                    oldJar.createNewFile()
+                }
+                if (!oldJar.renameTo(File("./KotBot-backup.jar"))) {
+                    KotBot.LOGGER.error("Unable to make backup jar, aborting update!")
+                    throw CommandException("Unable to make backup jar!")
+                }
+                if (newJar.renameTo(File("./KotBot.jar"))) {
+                    oldJar.deleteOnExit()
+                } else {
+                    KotBot.LOGGER.error("Unable to move updated jar, aborting update!")
+                    oldJar.renameTo(File("./KotBot.jar"))
+                    throw CommandException("Unable to move updated jar!")
+                }
+                KotBot.LOGGER.info("KotBot built and replaced, running...")
+                ProcessBuilder("java", "-jar", "./KotBot.jar", "${KotBot.CLIENT.token.removePrefix("Bot ")}").inheritIO().start()
+                return "Launched new instance!"
             }
 
         })

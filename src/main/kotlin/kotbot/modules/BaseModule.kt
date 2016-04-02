@@ -160,7 +160,7 @@ abstract class BaseModule : IModule {
     }
     
     fun hasPermission(user: IUser, requiredLevel: CommandPermissionLevels): Boolean { //FIXME: Add permissions database
-        return true
+        return if (requiredLevel == CommandPermissionLevels.OWNER) user == KotBot.OWNER else true
     }
     
     fun generateArgs(args: List<String>?): List<Any> {

@@ -118,4 +118,8 @@ hs_err_pid*
 # Config files
 config.json
 
+# Misc
+kotbot-git
+KotBot-backup.jar
+
 # Created by .ignore support plugin (hsz.mobi)
