@@ -115,4 +115,7 @@ hs_err_pid*
 # Log files
 *.log
 
+# Config files
+config.json
+
 # Created by .ignore support plugin (hsz.mobi)

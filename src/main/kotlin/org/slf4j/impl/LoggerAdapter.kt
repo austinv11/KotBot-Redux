@@ -35,15 +35,15 @@ class LoggerAdapter() : MarkerIgnoringBase() {
         /**
          * File to log errors
          */
-        val ERROR_LOG_FILE: File = File("./errors.log")
+        var ERROR_LOG_FILE: File = File("./errors.log")
         /**
          * File to log the rest of the log
          */
-        val LOG_FILE: File = File("./bot.log")
+        var LOG_FILE: File = File("./bot.log")
         /**
          * Ignores loggers containing these names
          */
-        val filteredNames: Array<String> = arrayOf("org.eclipse.jetty") //Jetty can get really spammy
+        var FILTERED_LOGGERS: Array<String> = arrayOf("org.eclipse.jetty") //Jetty can get really spammy
     }
     
     override fun warn(p0: String?) {
@@ -157,7 +157,7 @@ class LoggerAdapter() : MarkerIgnoringBase() {
     override fun isTraceEnabled() = true
     
     private fun log(level: Level, message: String, toReplace: Array<out Any?>? = null, error: Throwable? = null) {
-        for (string in filteredNames) { //Ignore filtered loggers names
+        for (string in FILTERED_LOGGERS) { //Ignore filtered loggers names
             if (name.contains(string))
                 return;
         }
