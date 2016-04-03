@@ -79,6 +79,7 @@ private fun searchAndDestroy() {
     try {
         val info: Information = KotBot.GSON.fromJson(Unirest.get(Endpoints.BOT).headers(mapOf(Pair("auth", KotBot.CLIENT.token))).asString().body)
         KotBot.startTime = LocalDateTime.parse(info.startTime)
+        KotBot.instances += info.instances 
 
         KotBot.LOGGER.info("Another KotBot instance found, closing it...")
         Unirest.delete(Endpoints.BOT).headers(mapOf(Pair("auth", KotBot.CLIENT.token))).asStringAsync().cancel(true)
@@ -138,7 +139,7 @@ private fun initRESTServer() {
     Server[AuthFailedException::class] = { exception, request, response -> response.status(403); response.body(KotBot.GSON.toJson(Message("Authentication failed"))) }
     
     //Requests start:
-    Server["/kotbot/api/bot/", RequestType.GET] = { request, response -> checkAuthToken(request); Information(KotBot.CLIENT.launchTime.toString()) }
+    Server["/kotbot/api/bot/", RequestType.GET] = { request, response -> checkAuthToken(request); Information(KotBot.CLIENT.launchTime.toString(), KotBot.instances) }
     Server["/kotbot/api/bot/", RequestType.DELETE] = { request, response -> checkAuthToken(request); shutdown(); "{}" }
     Server["/kotbot/api/ping/", RequestType.GET] = { request, response -> Ping(System.currentTimeMillis()) }
 }
@@ -175,6 +176,7 @@ class KotBot {
         }
         
         var startTime = LocalDateTime.now()
+        var instances = 1
         var isReconnecting = false
         
         final var CLIENT: IDiscordClient
