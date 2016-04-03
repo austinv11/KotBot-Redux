@@ -29,6 +29,13 @@ class AnalyticsModule : BaseModule() {
                 joiner.add("Instance Iterations: `${KotBot.instances}`")
                 return joiner.toString()
             }
+        }, object: Command("ping", arrayOf(), "Provides a brief ping analysis.", "") {
+            override fun execute(message: IMessage, args: List<Any>): String? {
+                var joiner = StringJoiner("\n")
+                joiner.add("Pong!")
+                joiner.add("Received this message `${System.currentTimeMillis()-message.timestamp.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()}`ms after it was sent.")
+                return joiner.toString()
+            }
         })
         return true
     }
