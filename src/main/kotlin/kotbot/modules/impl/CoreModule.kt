@@ -117,18 +117,28 @@ class CoreModule : BaseModule() {
                     throw CommandException("Unable to move updated jar!")
                 }
                 KotBot.LOGGER.info("KotBot built and replaced, running...")
-                ProcessBuilder("java", "-jar", "./KotBot.jar", "${KotBot.CLIENT.token.removePrefix("Bot ")}").inheritIO().start()
+                startNewBotInstance()
                 return "Launched new instance!"
             }
 
-        }, object: Command("kill", arrayOf("rip", "die", "diepleasedie"), "Kills the bot RIP.", "", CommandPermissionLevels.OWNER) {
+        }, object: Command("kill", arrayOf("rip", "die", "diepleasedie"), "Kills the bot, RIP.", "", CommandPermissionLevels.OWNER) {
             override fun execute(message: IMessage, args: List<Any>): String? {
                 shutdown()
                 return "Shutting down..." //You shouldn't see this
             }
 
+        }, object: Command("restart", arrayOf("reboot"), "Restarts the bot.", "", CommandPermissionLevels.OWNER) {
+            override fun execute(message: IMessage, args: List<Any>): String? {
+                KotBot.LOGGER.info("Request to restart received...")
+                startNewBotInstance()
+                return "Restarting..."
+            }
         })
         return true
+    }
+    
+    private fun startNewBotInstance() {
+        ProcessBuilder("java", "-jar", "./KotBot.jar", "${KotBot.CLIENT.token.removePrefix("Bot ")}").inheritIO().start()
     }
 
     override fun disable() {
