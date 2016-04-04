@@ -36,6 +36,7 @@ class CoreModule : BaseModule() {
                 builder.add("Bot Instance Iterations: ${KotBot.instances}")
                 builder.add("Initial Bot Instance Started At: ${KotBot.startTime}")
                 builder.add("Last Bot Instance Started At: ${Discord4J.getLaunchTime()}")
+                builder.add("Available Memory: ${Runtime.getRuntime().freeMemory()/100000}mb / ${Runtime.getRuntime().maxMemory()/100000}mb")
                 builder.add("Discord4J Version: ${Discord4J.VERSION}")
                 builder.add("Kotlin Version: ${KotBot.KOTLIN_VERSION}")
                 builder.add("JVM Version: ${System.getProperty("java.version")}")
