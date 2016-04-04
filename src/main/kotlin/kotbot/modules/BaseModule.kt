@@ -38,7 +38,7 @@ abstract class BaseModule : IModule {
             try {
                 command = commands.filter { it.key.contains(commandName) }.values.firstOrNull()!!.second
             } catch(e: NullPointerException) {
-                event.message.channel.sendMessage(formatErrorMessage("Command `$commandName` not found!"))
+                event.message.channel.sendMessage(formatErrorMessage("Command `$commandName` not found! Use ${KotBot.CONFIG.PREFIX}help for a list of commands."))
                 return
             }
 
