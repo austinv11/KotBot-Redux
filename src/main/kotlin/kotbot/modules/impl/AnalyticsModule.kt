@@ -35,8 +35,8 @@ class AnalyticsModule : BaseModule() {
                 var joiner = StringJoiner("\n")
                 joiner.add("Pong!")
                 joiner.add("Received this message `${System.currentTimeMillis()-message.timestamp.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()}`ms after it was sent.")
-                joiner.add("Last websocket ping response time: `${KotBot.CLIENT.responseTime}`")
-                joiner.add("Average api response time for today: `${DiscordStatus.getAPIResponseTimeForDay()}`")
+                joiner.add("Last websocket ping response time: `${KotBot.CLIENT.responseTime}`ms")
+                joiner.add("Average api response time for today: `${DiscordStatus.getAPIResponseTimeForDay()}`ms")
                 return joiner.toString()
             }
         })
