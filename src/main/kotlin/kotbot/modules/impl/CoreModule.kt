@@ -53,7 +53,8 @@ class CoreModule : BaseModule() {
                         val (module, command) = it.value
                         if (!moduleCommandMap.containsKey(module))
                             moduleCommandMap.put(module, mutableListOf<Command>())
-                        moduleCommandMap[module]!!.add(command)
+                        if (!command.isHidden) 
+                            moduleCommandMap[module]!!.add(command)
                     }
                     for (module in moduleCommandMap.keys) {
                         joiner.add("Commands for module '${module.name}':")
