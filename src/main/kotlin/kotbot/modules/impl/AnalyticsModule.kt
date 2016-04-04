@@ -4,6 +4,7 @@ import kotbot.KotBot
 import kotbot.modules.BaseModule
 import kotbot.modules.Command
 import sx.blah.discord.Discord4J
+import sx.blah.discord.api.DiscordStatus
 import sx.blah.discord.api.IDiscordClient
 import sx.blah.discord.handle.obj.IMessage
 import java.time.ZoneId
@@ -29,11 +30,13 @@ class AnalyticsModule : BaseModule() {
                 joiner.add("Instance Iterations: `${KotBot.instances}`")
                 return joiner.toString()
             }
-        }, object: Command("ping", arrayOf(), "Provides a brief ping analysis.", "") {
+        }, object: Command("ping", arrayOf(), "Provides a brief ping analysis.", "", async = true) {
             override fun execute(message: IMessage, args: List<Any>): String? {
                 var joiner = StringJoiner("\n")
                 joiner.add("Pong!")
                 joiner.add("Received this message `${System.currentTimeMillis()-message.timestamp.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()}`ms after it was sent.")
+                joiner.add("Last websocket ping response time: `${KotBot.CLIENT.responseTime}`")
+                joiner.add("Average api response time for today: `${DiscordStatus.getAPIResponseTimeForDay()}`")
                 return joiner.toString()
             }
         })
