@@ -3,7 +3,7 @@ package kotbot.modules.impl
 import kotbot.modules.BaseModule
 import kotbot.modules.Command
 import kotbot.modules.CommandPermissionLevels
-import sx.blah.discord.api.IDiscordClient
+import kotbot.modules.Parameter
 import sx.blah.discord.api.IListener
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent
 import sx.blah.discord.handle.obj.IMessage
@@ -15,8 +15,8 @@ import kotlin.concurrent.thread
  */
 class UtilityModule : BaseModule() {
     
-    override fun enable(client: IDiscordClient): Boolean {
-        registerCommands(object: Command("cli", arrayOf(), "Mirrors the bot's OS's CLI.", "command optional:[arguments]",
+    override fun enableModule(): Boolean {
+        registerCommands(object: Command("cli", arrayOf(), "Mirrors the bot's OS's CLI.", arrayOf(Parameter("arguments", true)),
                 CommandPermissionLevels.OWNER, async = true) {
             override fun execute(message: IMessage, args: List<Any>): String? {//FIXME: Some weird things happen in the cli
                 message.channel.sendMessage("Entering CLI mode, any messages ${message.author.mention()} sends in this " +
@@ -51,7 +51,7 @@ class UtilityModule : BaseModule() {
         return true
     }
 
-    override fun disable() { //TODO
+    override fun disableModule() { //TODO
         throw UnsupportedOperationException()
     }
 }

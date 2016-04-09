@@ -5,7 +5,6 @@ import kotbot.modules.BaseModule
 import kotbot.modules.Command
 import sx.blah.discord.Discord4J
 import sx.blah.discord.api.DiscordStatus
-import sx.blah.discord.api.IDiscordClient
 import sx.blah.discord.handle.obj.IMessage
 import java.time.ZoneId
 import java.util.*
@@ -16,8 +15,8 @@ import java.util.concurrent.TimeUnit
  */
 class AnalyticsModule : BaseModule() {
     
-    override fun enable(client: IDiscordClient?): Boolean {
-        registerCommands(object: Command("uptime", arrayOf(), "Provides information regarding the bot's uptime.", "") {
+    override fun enableModule(): Boolean {
+        registerCommands(object: Command("uptime", arrayOf(), "Provides information regarding the bot's uptime.", arrayOf()) {
             override fun execute(message: IMessage, args: List<Any>): String? {
                 val joiner = StringJoiner("\n")
                 joiner.add("__Uptime:__")
@@ -30,7 +29,7 @@ class AnalyticsModule : BaseModule() {
                 joiner.add("Instance Iterations: `${KotBot.instances}`")
                 return joiner.toString()
             }
-        }, object: Command("ping", arrayOf(), "Provides a brief ping analysis.", "", async = true) {
+        }, object: Command("ping", arrayOf(), "Provides a brief ping analysis.", arrayOf(), async = true) {
             override fun execute(message: IMessage, args: List<Any>): String? {
                 var joiner = StringJoiner("\n")
                 joiner.add("Pong!")
@@ -55,7 +54,7 @@ class AnalyticsModule : BaseModule() {
         return "$days days, $hours hours, $minutes minutes, $seconds seconds"
     }
 
-    override fun disable() { //TODO
+    override fun disableModule() { //TODO
         throw UnsupportedOperationException()
     }
 }

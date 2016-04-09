@@ -17,9 +17,13 @@ class DataBase {
         fun init() {
             db.transaction { 
                 create(Users)
+                create(Blacklist)
             }
         }
-        
+
+        /**
+         * Gets the permission level for a given user id.
+         */
         fun getUserPermissions(userId: String): CommandPermissionLevels {
             var result: CommandPermissionLevels? = null
             
@@ -41,9 +45,53 @@ class DataBase {
             }
             return result ?: CommandPermissionLevels.NONE
         }
+
+        /**
+         * Checks if an id is in the blacklist. Returns true if blacklisted, false if otherwise.
+         */
+        fun checkBlacklist(id: String): Boolean {
+            var returnVal: Boolean? = null
+            db.transaction { 
+                val entry = BlacklistEntry.all().find { it.uid == id }
+                if (entry == null)
+                   returnVal = false
+                else 
+                    returnVal = true
+            }
+            return returnVal ?: false
+        }
+
+        /**
+         * Toggles whether or not this id is in the blacklist. Returns true if it is now blacklisted, false if otherwise.
+         */
+        fun toggleBlacklist(id: String): Boolean {
+            var returnVal: Boolean? = null
+            db.transaction {
+                val entry = BlacklistEntry.all().find { it.uid == id }
+                if (entry == null) {
+                    BlacklistEntry.new { 
+                        uid = id
+                    }
+                    returnVal = true
+                } else {
+                    entry.delete()
+                    returnVal = false
+                }
+            }
+            return returnVal ?: true
+        }
     }
 }
 
+object Blacklist : IntIdTable() {
+    val uid = text("uid")
+}
+
+class BlacklistEntry(id: EntityID<Int>) : IntEntity(id) {
+    companion object : IntEntityClass<BlacklistEntry>(Blacklist)
+
+    var uid by Blacklist.uid
+}
 
 object Users : IntIdTable() {
     val uid = text("uid")

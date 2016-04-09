@@ -7,7 +7,7 @@ import java.util.*
 /**
  * This is used to represent a command.
  */
-abstract class Command(val name: String, val aliases: Array<String>, val description: String, val usage: String,
+abstract class Command(val name: String, val aliases: Array<String>, val description: String, val usage: Array<Parameter>,
                    val botPermissionLevel: CommandPermissionLevels = CommandPermissionLevels.DEFAULT,
                    val directMessages: Boolean = true, val channelMessages: Boolean = true,
                    val isHidden: Boolean = false, val async: Boolean = false,
@@ -18,3 +18,8 @@ abstract class Command(val name: String, val aliases: Array<String>, val descrip
      */
     abstract fun execute(message: IMessage, args: List<Any>): String?
 }
+
+/**
+ * Represents a command parameter. Allows for cleaner help messages.
+ */
+data class Parameter(val name: String, val optional: Boolean = false);

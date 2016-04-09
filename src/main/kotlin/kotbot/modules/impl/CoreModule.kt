@@ -1,13 +1,10 @@
 package kotbot.modules.impl
 
+import kotbot.DataBase
 import kotbot.KotBot
-import kotbot.modules.BaseModule
-import kotbot.modules.Command
-import kotbot.modules.CommandException
-import kotbot.modules.CommandPermissionLevels
+import kotbot.modules.*
 import kotbot.shutdown
 import sx.blah.discord.Discord4J
-import sx.blah.discord.api.IDiscordClient
 import sx.blah.discord.handle.obj.IMessage
 import java.io.File
 import java.util.*
@@ -17,8 +14,8 @@ import java.util.*
  */
 class CoreModule : BaseModule() {
     
-    override fun enable(client: IDiscordClient): Boolean {
-        registerCommands(object: Command("info", arrayOf("i", "about"), "Displays general information about this bot.", "") {
+    override fun enableModule(): Boolean {
+        registerCommands(object: Command("info", arrayOf("i", "about"), "Displays general information about this bot.", arrayOf()) {
             override fun execute(message: IMessage, args: List<Any>): String? {
                 var builder = StringJoiner("\n")
                 builder.add("```")
@@ -44,7 +41,7 @@ class CoreModule : BaseModule() {
                 return builder.toString()
             }
         }, object: Command("help", arrayOf("?", "h"), "Displays a list of commands as well as information on how to use them.",
-                "optional:[command name]") {
+                arrayOf(Parameter("command name", true))) {
             override fun execute(message: IMessage, args: List<Any>): String? {
                 val joiner = StringJoiner("\n")
                 if (args.size < 1) {
@@ -76,7 +73,16 @@ class CoreModule : BaseModule() {
                             aliasList.add(alias)
                         joiner.add("__Aliases:__ `${aliasList.toString()}`")
                         joiner.add("__Description:__ ${command.description}")
-                        joiner.add("__Usage:__ `${KotBot.CONFIG.PREFIX}${command.name} ${command.usage}`")
+                        val usage = buildString { 
+                            command.usage.forEach { 
+                                append(" ")
+                                if (it.optional) {
+                                    append("optional:")
+                                }
+                                append("[${it.name}]")
+                            }
+                        }
+                        joiner.add("__Usage:__ `${KotBot.CONFIG.PREFIX}${command.name}$usage`")
                     } catch(e: NullPointerException) {
                         throw CommandException("Command `$commandName` not found!")
                     }
@@ -85,7 +91,7 @@ class CoreModule : BaseModule() {
             }
 
         }, object: Command("update", arrayOf("up", "compile"), 
-                "Clones the git repo for this bot and then compiles and launches the latest version.", "", 
+                "Clones the git repo for this bot and then compiles and launches the latest version.", arrayOf(), 
                 CommandPermissionLevels.OWNER, async = true) {
             override fun execute(message: IMessage, args: List<Any>): String? {
                 KotBot.LOGGER.info("Request to recompile received, ensuring git is installed...")
@@ -123,17 +129,39 @@ class CoreModule : BaseModule() {
                 return "Launched new instance!"
             }
 
-        }, object: Command("kill", arrayOf("rip", "die", "diepleasedie"), "Kills the bot, RIP.", "", CommandPermissionLevels.OWNER) {
+        }, object: Command("kill", arrayOf("rip", "die", "diepleasedie"), "Kills the bot, RIP.", arrayOf(), CommandPermissionLevels.OWNER) {
             override fun execute(message: IMessage, args: List<Any>): String? {
                 shutdown()
                 return "Shutting down..." //You shouldn't see this
             }
 
-        }, object: Command("restart", arrayOf("reboot"), "Restarts the bot.", "", CommandPermissionLevels.OWNER) {
+        }, object: Command("restart", arrayOf("reboot"), "Restarts the bot.", arrayOf(), CommandPermissionLevels.OWNER) {
             override fun execute(message: IMessage, args: List<Any>): String? {
                 KotBot.LOGGER.info("Request to restart received...")
                 startNewBotInstance()
                 return "Restarting..."
+            }
+        }, object: Command("blacklist", arrayOf(), "Toggles the blacklist for this channel or guild. When blacklisted, " +
+                "this bot will not monitor events in the channel/guild but it WILL still monitor for commands.", 
+                arrayOf(Parameter("for guild (true/false)", true)), botPermissionLevel = CommandPermissionLevels.ADMIN) {
+            override fun execute(message: IMessage, args: List<Any>): String? {
+                var isChannel = true
+                if (args.size > 0) {
+                    if (args[0] !is Boolean) {
+                        throw CommandException("Argument `${args[0]}` is not a boolean!")
+                    } else {
+                        isChannel = !(args[0] as Boolean)
+                    }
+                }
+                
+                var result: Boolean
+                if (isChannel) {
+                    result = DataBase.toggleBlacklist(message.channel.id)
+                } else {
+                    result = DataBase.toggleBlacklist(message.guild.id)
+                }
+                
+                return "This ${if (isChannel) "channel" else "guild"} is now ${if (result) "blacklisted" else "un-blacklisted"}!"
             }
         })
         return true
@@ -143,7 +171,7 @@ class CoreModule : BaseModule() {
         ProcessBuilder("java", "-jar", "./KotBot.jar", "${KotBot.CLIENT.token.removePrefix("Bot ")}").inheritIO().start()
     }
 
-    override fun disable() {
+    override fun disableModule() {
         throw UnsupportedOperationException()
     }
 }
