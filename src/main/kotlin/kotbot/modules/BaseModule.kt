@@ -1,5 +1,6 @@
 package kotbot.modules
 
+import kotbot.DataBase
 import kotbot.KotBot
 import sx.blah.discord.Discord4J
 import sx.blah.discord.api.internal.DiscordUtils
@@ -50,7 +51,7 @@ abstract class BaseModule : IModule {
 
             try {
                 if (!hasPermission(event.message.author, command.botPermissionLevel)) {
-                    event.message.channel.sendMessage(formatErrorMessage("${event.message.author.mention()}, you don't have the required permissions for this command!"))
+                    event.message.channel.sendMessage(formatErrorMessage("${event.message.author.mention()}, you don't have the required permissions for this command `${command.botPermissionLevel}`!"))
                     return
                 }
 
@@ -116,8 +117,8 @@ abstract class BaseModule : IModule {
             }
         }
 
-        fun hasPermission(user: IUser, requiredLevel: CommandPermissionLevels): Boolean { //FIXME: Add permissions database
-            return if (requiredLevel == CommandPermissionLevels.OWNER) user == KotBot.OWNER else true
+        fun hasPermission(user: IUser, requiredLevel: CommandPermissionLevels): Boolean {
+            return DataBase.getUserPermissions(user.id) <= requiredLevel
         }
 
         fun generateArgs(args: List<String>?): List<Any> {

@@ -127,6 +127,8 @@ private fun initLifcycleListeners() {
     KotBot.CLIENT.dispatcher.registerListener(IListener<MessageReceivedEvent> {
         BaseModule.onMessageReceived(it)
     })
+    
+    DataBase.init()
 }
 
 /**

@@ -121,5 +121,6 @@ config.json
 # Misc
 kotbot-git
 KotBot-backup.jar
+*.db
 
 # Created by .ignore support plugin (hsz.mobi)
