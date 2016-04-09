@@ -154,7 +154,8 @@ private fun initRESTServer() {
  */
 fun shutdown() {
     KotBot.LOGGER.info("Shutdown request received, shutting down...")
-    KotBot.CLIENT.logout()
+    if (!KotBot.isReconnecting) //Prevents infinite reconnect loops
+        KotBot.CLIENT.logout()
     Server.stop()
     System.exit(1)
 }

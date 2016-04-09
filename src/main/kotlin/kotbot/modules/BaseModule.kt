@@ -79,6 +79,7 @@ abstract class BaseModule : IModule {
 
                         } catch(e: Exception) {
                             event.message.channel.sendMessage(formatErrorMessage(e))
+                            e.printStackTrace()
                         } finally {
                             if (event.message.channel.typingStatus)
                                 event.message.channel.toggleTypingStatus()
@@ -97,6 +98,7 @@ abstract class BaseModule : IModule {
                 }
             } catch(e: Exception) {
                 event.message.channel.sendMessage(formatErrorMessage(e))
+                e.printStackTrace()
             }
         }
 
