@@ -6,6 +6,7 @@ import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.IntIdTable
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.update
 
 /**
  * SQL database built on JetBrain's Exposed SQL framework for Kotlin
@@ -44,6 +45,15 @@ class DataBase {
                 }
             }
             return result ?: CommandPermissionLevels.NONE
+        }
+        
+        fun updateUserPermissions(userId: String, level: CommandPermissionLevels) {
+            db.transaction {
+                val user = User.all().find { it.uid == userId } ?: return@transaction
+                Users.update({Users.uid eq userId}) {
+                    it[permissions] = level.name
+                }
+            }
         }
 
         /**

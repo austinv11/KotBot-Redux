@@ -163,6 +163,48 @@ class CoreModule : BaseModule() {
                 
                 return "This ${if (isChannel) "channel" else "guild"} is now ${if (result) "blacklisted" else "un-blacklisted"}!"
             }
+        }, object: Command("promote", arrayOf(), "Promotes a user one permission level up", arrayOf(Parameter("user (id or mention)")), 
+                botPermissionLevel = CommandPermissionLevels.OWNER) {
+            override fun execute(message: IMessage, args: List<Any>): String? {
+                if (args.size < 1)
+                    throw CommandException("No user provided!")
+                
+                val effected = message.mentions.filter { it != KotBot.CLIENT.ourUser }
+                        .getOrElse(0, { KotBot.CLIENT.getUserByID(args[0].toString()) }) 
+                        ?: throw CommandException("Can't find user `${args[0]}`.")
+                
+                if (effected == KotBot.CLIENT.ourUser)
+                    throw CommandException("Can't modify an owner's permissions!")
+
+                val currentPerms = DataBase.getUserPermissions(effected.id)
+                if (currentPerms == CommandPermissionLevels.ADMIN)
+                    throw CommandException("User ${effected.mention()} already has the highest permission level possible (`$currentPerms`)")
+                
+                DataBase.updateUserPermissions(effected.id, CommandPermissionLevels.values()[currentPerms.ordinal - 1])
+                
+                return "User ${effected.mention()} now has the permission level `${DataBase.getUserPermissions(effected.id)}`"
+            }
+        }, object: Command("demote", arrayOf(), "Demotes a user one permission level down", arrayOf(Parameter("user (id or mention)")),
+                botPermissionLevel = CommandPermissionLevels.OWNER) {
+            override fun execute(message: IMessage, args: List<Any>): String? {
+                if (args.size < 1)
+                    throw CommandException("No user provided!")
+
+                val effected = message.mentions.filter { it != KotBot.CLIENT.ourUser }
+                        .getOrElse(0, { KotBot.CLIENT.getUserByID(args[0].toString()) })
+                        ?: throw CommandException("Can't find user `${args[0]}`.")
+
+                if (effected == KotBot.CLIENT.ourUser)
+                    throw CommandException("Can't modify an owner's permissions!")
+                
+                val currentPerms = DataBase.getUserPermissions(effected.id)
+                if (currentPerms == CommandPermissionLevels.NONE)
+                    throw CommandException("User ${effected.mention()} already has the lowest permission level possible (`$currentPerms`)")
+
+                DataBase.updateUserPermissions(effected.id, CommandPermissionLevels.values()[currentPerms.ordinal + 1])
+
+                return "User ${effected.mention()} now has the permission level `${DataBase.getUserPermissions(effected.id)}`"
+            }
         })
         return true
     }
