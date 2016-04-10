@@ -6,6 +6,7 @@ import kotbot.modules.*
 import kotbot.shutdown
 import sx.blah.discord.Discord4J
 import sx.blah.discord.handle.obj.IMessage
+import sx.blah.discord.handle.obj.IUser
 import java.io.File
 import java.util.*
 
@@ -141,6 +142,7 @@ class CoreModule : BaseModule() {
                 startNewBotInstance()
                 return "Restarting..."
             }
+            
         }, object: Command("blacklist", arrayOf(), "Toggles the blacklist for this channel or guild. When blacklisted, " +
                 "this bot will not monitor events in the channel/guild but it WILL still monitor for commands.", 
                 arrayOf(Parameter("for guild (true/false)", true)), botPermissionLevel = CommandPermissionLevels.ADMIN) {
@@ -163,7 +165,8 @@ class CoreModule : BaseModule() {
                 
                 return "This ${if (isChannel) "channel" else "guild"} is now ${if (result) "blacklisted" else "un-blacklisted"}!"
             }
-        }, object: Command("promote", arrayOf(), "Promotes a user one permission level up", arrayOf(Parameter("user (id or mention)")), 
+            
+        }, object: Command("promote", arrayOf(), "Promotes a user one permission level up.", arrayOf(Parameter("user (id or mention)")), 
                 botPermissionLevel = CommandPermissionLevels.OWNER) {
             override fun execute(message: IMessage, args: List<Any>): String? {
                 if (args.size < 1)
@@ -184,7 +187,8 @@ class CoreModule : BaseModule() {
                 
                 return "User ${effected.mention()} now has the permission level `${DataBase.getUserPermissions(effected.id)}`"
             }
-        }, object: Command("demote", arrayOf(), "Demotes a user one permission level down", arrayOf(Parameter("user (id or mention)")),
+            
+        }, object: Command("demote", arrayOf(), "Demotes a user one permission level down.", arrayOf(Parameter("user (id or mention)")),
                 botPermissionLevel = CommandPermissionLevels.OWNER) {
             override fun execute(message: IMessage, args: List<Any>): String? {
                 if (args.size < 1)
@@ -205,12 +209,70 @@ class CoreModule : BaseModule() {
 
                 return "User ${effected.mention()} now has the permission level `${DataBase.getUserPermissions(effected.id)}`"
             }
+            
+        }, object: Command("whoami", arrayOf(), "Gets your current user information.", arrayOf(), 
+                botPermissionLevel = CommandPermissionLevels.NONE) {
+            override fun execute(message: IMessage, args: List<Any>): String? {
+                return buildUserInfoMessage(message.author)
+            }
+            
+        }, object: Command("whois", arrayOf(), "Gets current user information for the provided user.", arrayOf(Parameter("user (id or mention)"))) {
+            override fun execute(message: IMessage, args: List<Any>): String? {
+                if (args.size < 1)
+                    throw CommandException("No user provided!")
+
+                val effected = message.mentions.filter { it != KotBot.CLIENT.ourUser }
+                        .getOrElse(0, { KotBot.CLIENT.getUserByID(args[0].toString()) })
+                        ?: throw CommandException("Can't find user `${args[0]}`.")
+                
+                return buildUserInfoMessage(effected)
+            }
+
+        }, object: Command("whereami", arrayOf(), "Gets the current channel information.", arrayOf(Parameter("user (id or mention)")),
+                botPermissionLevel = CommandPermissionLevels.NONE) {
+            override fun execute(message: IMessage, args: List<Any>): String? {
+                val channel = message.channel
+                return buildString {
+                    appendln("Information for channel ${channel.mention()}:")
+                    appendln("```")
+                    appendln("Name: #${channel.name}")
+                    appendln("ID: ${channel.id}")
+                    appendln("Channel Creation Date: ${channel.creationDate}")
+                    appendln("Is Channel Blacklisted?: ${DataBase.checkBlacklist(channel.id)}")
+                    appendln("```")
+                    val guild = channel.guild
+                    appendln("In guild ${guild.name}")
+                    appendln("```")
+                    appendln("ID: ${guild.id}")
+                    appendln("Owner: ${guild.owner.name}#${guild.owner.discriminator}")
+                    appendln("Icon: ${guild.iconURL}")
+                    appendln("Region: ${guild.region}")
+                    appendln("Guild Creation Date: ${guild.creationDate}")
+                    appendln("Is Guild Blacklisted?: ${DataBase.checkBlacklist(guild.id)}")
+                    append("```")
+                }
+            }
+            
         })
         return true
     }
     
     private fun startNewBotInstance() {
         ProcessBuilder("java", "-jar", "./KotBot.jar", "${KotBot.CLIENT.token.removePrefix("Bot ")}").inheritIO().start()
+    }
+    
+    private fun buildUserInfoMessage(user: IUser): String {
+        return buildString { 
+            appendln("Information for user ${user.mention()}:")
+            appendln("```")
+            appendln("Name: ${user.name}#${user.discriminator}")
+            appendln("ID: ${user.id}")
+            appendln("Is a Bot?: ${user.isBot}")
+            appendln("Avatar: ${user.avatarURL}")
+            appendln("User Account Creation Date: ${user.creationDate}")
+            appendln("KotBot Permission Level: ${DataBase.getUserPermissions(user.id)}")
+            append("```")
+        }
     }
 
     override fun disableModule() {
