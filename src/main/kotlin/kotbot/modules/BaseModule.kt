@@ -84,7 +84,7 @@ abstract class BaseModule : IModule {
 
             try {
                 if (!hasPermission(event.message.author, command.botPermissionLevel)) {
-                    event.message.channel.sendMessage(formatErrorMessage("${event.message.author.mention()}, you don't have the required permissions for this command `${command.botPermissionLevel}`!"))
+                    event.message.channel.sendMessage(formatErrorMessage("${event.message.author.mention()}, you don't have the required permissions for this command. Need: `${command.botPermissionLevel}`!"))
                     return
                 }
 

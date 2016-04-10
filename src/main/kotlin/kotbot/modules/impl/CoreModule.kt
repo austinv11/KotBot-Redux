@@ -241,7 +241,7 @@ class CoreModule : BaseModule() {
                     appendln("Is Channel Blacklisted?: ${DataBase.checkBlacklist(channel.id)}")
                     appendln("```")
                     val guild = channel.guild
-                    appendln("In guild ${guild.name}")
+                    appendln("In guild ${guild.name}:")
                     appendln("```")
                     appendln("ID: ${guild.id}")
                     appendln("Owner: ${guild.owner.name}#${guild.owner.discriminator}")
