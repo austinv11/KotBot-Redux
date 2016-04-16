@@ -94,7 +94,7 @@ abstract class BaseModule : IModule {
                 var args: MutableList<String>?
                 if (cleanedMessage.contains(" ")) {
                     args = cleanedMessage.split(" ").toMutableList()
-                    args = args.drop(1).toMutableList()
+                    args = args.toMutableList()
                 } else if (!cleanedMessage.isEmpty()) {
                     args = mutableListOf(cleanedMessage)
                 } else {
@@ -156,26 +156,51 @@ abstract class BaseModule : IModule {
 
         fun generateArgs(args: List<String>?): List<Any> {
             var newArgs = mutableListOf<Any>()
-
+            var quoteEnclosed = mutableListOf<String>()
+            var isParsingQuotes = false
+            
             if (args != null) {
                 for (string in args) {
-                    if (string.equals("true", true) || string.equals("false", true)) {
-                        newArgs.add(string.toBoolean())
-                        continue
-                    }
-                    try {
-                        if (string.contains('.')) {
-                            newArgs.add(string.toDouble())
+                    if (string.count { it == '"' } == 1) {
+                        quoteEnclosed.add(string)
+                        if (isParsingQuotes) {
+                            isParsingQuotes = false
+                            newArgs.add(buildStringFromQuoteArg(quoteEnclosed))
+                            quoteEnclosed.clear()
                         } else {
-                            newArgs.add(string.toInt())
+                            isParsingQuotes = true
                         }
-                    } catch(e: NumberFormatException) {
-                        newArgs.add(string)
+                    } else {
+                        if (isParsingQuotes) {
+                            quoteEnclosed.add(string)
+                        } else {
+                            if (string.equals("true", true) || string.equals("false", true)) {
+                                newArgs.add(string.toBoolean())
+                                continue
+                            }
+                            try {
+                                if (string.contains('.')) {
+                                    newArgs.add(string.toDouble())
+                                } else {
+                                    newArgs.add(string.toInt())
+                                }
+                            } catch(e: NumberFormatException) {
+                                newArgs.add(string)
+                            }
+                        }
                     }
                 }
             }
+            
+            if (quoteEnclosed.size > 0) {
+                newArgs.add(buildStringFromQuoteArg(quoteEnclosed))
+            }
 
             return newArgs
+        }
+        
+        private fun buildStringFromQuoteArg(strings: List<String>): String {
+            return buildString { strings.forEach { append(it+" ") } }.trimEnd().removeSurrounding("\"")
         }
 
         fun <T: Event> checkFieldsForBlacklist(event: T) : Boolean {
