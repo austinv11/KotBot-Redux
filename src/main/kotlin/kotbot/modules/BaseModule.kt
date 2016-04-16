@@ -230,7 +230,7 @@ abstract class BaseModule : IModule {
     }
 
     override fun getVersion(): String? {
-        return KotBot.VERSION
+        return KotBot.KOTBOT_REVISION
     }
 
     override fun getMinimumDiscord4JVersion(): String? {

@@ -16,12 +16,13 @@ import java.util.*
 class CoreModule : BaseModule() {
     
     override fun enableModule(): Boolean {
-        registerCommands(object: Command("info", arrayOf("i", "about"), "Displays general information about this bot.", arrayOf()) {
+        registerCommands(object: Command("info", arrayOf("i", "about"), "Displays general information about this bot.", arrayOf(), async = true) {
             override fun execute(message: IMessage, args: List<Any>): String? {
                 var builder = StringJoiner("\n")
                 builder.add("```")
-                builder.add("KotBot v${KotBot.VERSION}")
-                builder.add("--------${StringBuilder().padEnd(KotBot.VERSION.length, '-')}")
+                val headerLine = "KotBot (revision: ${KotBot.KOTBOT_REVISION})"
+                builder.add(headerLine)
+                builder.add(StringBuilder().padEnd(headerLine.length, '-').toString())
                 builder.add("KotBot is a bot written in Kotlin built on top of the Discord4J library.")
                 builder.add("Invite Link: ${KotBot.CONFIG.INVITE_LINK}")
                 builder.add("Github: https://github.com/austinv11/KotBot-Redux")

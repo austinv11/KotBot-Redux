@@ -171,8 +171,21 @@ class KotBot {
         final val GSON = GsonBuilder().serializeNulls().setPrettyPrinting().create()
         final val CONFIG_FILE = File("./config.json")
         final val CONFIG = if (CONFIG_FILE.exists()) GSON.fromJson<Config>(CONFIG_FILE.reader()) else Config()
-        const val VERSION = "1.0.0-SNAPSHOT"
         const val KOTLIN_VERSION = "1.0.1"
+        private var _kotbotRevision: String? = null
+        final val KOTBOT_REVISION: String
+            get() {
+                if (_kotbotRevision == null) {
+                    try {
+                        val process = ProcessBuilder("git", "rev-parse", "--short", "HEAD").directory(File("./kotbot-git/KotBot-Redux/")).start()
+                        process.waitFor()
+                        _kotbotRevision = process.inputStream.bufferedReader().readLine()
+                    } catch (e: Exception) {
+                        LOGGER.error("Error parsing git revision...", e)
+                    }
+                }
+                return _kotbotRevision ?: "UNKNOWN"
+            }
         val OWNER_NAME: String
             get() {return if (INSTANCE.client != null) "${OWNER.name}#${OWNER.discriminator}" else "Austin"}
         val OWNER: IUser
