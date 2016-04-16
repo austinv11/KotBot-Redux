@@ -109,21 +109,12 @@ class CoreModule : BaseModule() {
                 localRepoDir.deleteOnExit()
                 KotBot.LOGGER.info("Git repo cloned, building KotBot...")
                 ProcessBuilder("./gradlew", "installShadowApp").inheritIO().directory(localRepoDir).start().waitFor()
-                val newJar = File("./kotbot-git/KotBot-Redux/build/libs/KotBot-all.jar")
-                val oldJar = File("./KotBot.jar")
-                if (!oldJar.exists()) {
-                    KotBot.LOGGER.warn("KotBot jar not found! Creating placeholder...")
-                    oldJar.createNewFile()
-                }
-                if (!oldJar.renameTo(File("./KotBot-backup.jar"))) {
-                    KotBot.LOGGER.error("Unable to make backup jar, aborting update!")
-                    throw CommandException("Unable to make backup jar!")
-                }
-                if (newJar.renameTo(File("./KotBot.jar"))) {
-                    oldJar.deleteOnExit()
-                } else {
+                ProcessBuilder("mv", "./KotBot.jar", "./KotBot-Backup.jar").inheritIO().start().waitFor()
+                ProcessBuilder("mv", "./kotbot-git/KotBot-Redux/build/libs/KotBot-all.jar", "./KotBot.jar").inheritIO().start().waitFor()
+                val jar = File("./KotBot.jar")
+                if (!jar.exists()) {
                     KotBot.LOGGER.error("Unable to move updated jar, aborting update!")
-                    oldJar.renameTo(File("./KotBot.jar"))
+                    ProcessBuilder("mv", "./KotBot-Backup.jar", "./KotBot.jar").inheritIO().start().waitFor()
                     throw CommandException("Unable to move updated jar!")
                 }
                 KotBot.LOGGER.info("KotBot built and replaced, running...")

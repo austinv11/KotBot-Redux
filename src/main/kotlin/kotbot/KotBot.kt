@@ -28,6 +28,7 @@ import sx.blah.discord.modules.ModuleLoader
 import sx.blah.discord.util.DiscordException
 import java.io.File
 import java.time.LocalDateTime
+import java.util.concurrent.TimeUnit
 
 fun main(args: Array<String>) {
     if (args.size < 1)
@@ -178,7 +179,7 @@ class KotBot {
                 if (_kotbotRevision == null) {
                     try {
                         val process = ProcessBuilder("git", "rev-parse", "--short", "HEAD").directory(File("./kotbot-git/KotBot-Redux/")).start()
-                        process.waitFor()
+                        process.waitFor(5, TimeUnit.SECONDS)
                         _kotbotRevision = process.inputStream.bufferedReader().readLine()
                     } catch (e: Exception) {
                         LOGGER.error("Error parsing git revision...", e)
