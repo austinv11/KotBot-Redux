@@ -9,14 +9,14 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 /**
- * This represents bot functions which relate to event (not necessarily Discord's) monitoring.
+ * This represents bot functions which relate to events (not necessarily Discord's) monitoring.
  */
 class MonitorModule : BaseModule() {
 
     val timer = Timer("Monitor Timer", true)
     
     companion object {
-        final val DEFAULT_TIME_UNIT = TimeUnit.MILLISECONDS 
+        final val DEFAULT_TIME_UNIT = TimeUnit.MILLISECONDS
     }
     
     override fun enableModule(): Boolean {
