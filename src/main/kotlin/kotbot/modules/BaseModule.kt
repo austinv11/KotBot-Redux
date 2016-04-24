@@ -16,6 +16,7 @@ import sx.blah.discord.modules.IModule
 import sx.blah.discord.util.MissingPermissionsException
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
+import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.memberProperties
 
 /**
@@ -215,16 +216,19 @@ abstract class BaseModule : IModule {
             var channels = mutableListOf<IChannel>()
             
             for (guildProperty in guildProperties) {
+                guildProperty.isAccessible = true
                 guilds.add(guildProperty.get(event) as IGuild)
             }
             
             for (messageProperty in messageProperties) {
+                messageProperty.isAccessible = true
                 val message = messageProperty.get(event) as IMessage
                 guilds.add(message.guild)
                 channels.add(message.channel)
             }
             
             for (channelProperty in channelProperties) {
+                channelProperty.isAccessible = true
                 val channel = channelProperty.get(event) as IChannel
                 guilds.add(channel.guild)
                 channels.add(channel)

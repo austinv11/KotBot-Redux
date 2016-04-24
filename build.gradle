@@ -42,6 +42,8 @@ dependencies {
     compile "org.reflections:reflections:0.9.10"
     //Kotlin jdbc framework
     compile "org.jetbrains.exposed:exposed:0.4.2"
+    //Java string similarity api
+    compile "info.debatty:java-string-similarity:0.13"
     
     //Standard testing:
     testCompile 'junit:junit:4.11'

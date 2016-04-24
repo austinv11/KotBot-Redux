@@ -1,9 +1,14 @@
 package kotbot.modules.impl
 
+import info.debatty.java.stringsimilarity.*
+import info.debatty.java.stringsimilarity.interfaces.NormalizedStringDistance
+import kotbot.KotBot
 import kotbot.modules.BaseModule
 import kotbot.modules.Command
 import kotbot.modules.CommandException
 import kotbot.modules.Parameter
+import sx.blah.discord.api.IListener
+import sx.blah.discord.handle.impl.events.MessageReceivedEvent
 import sx.blah.discord.handle.obj.IMessage
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -47,10 +52,65 @@ class MonitorModule : BaseModule() {
             }
         })
         
+        initMonitors()
+        
         return true
     }
 
     override fun disableModule() {
         timer.cancel()
+    }
+    
+    private fun initMonitors() {
+        //FIXME: Use BaseModule#registerListener() 
+        client.dispatcher.registerListener(IListener<MessageReceivedEvent> { //Message responder monitor
+            for (config in KotBot.CONFIG.MESSAGE_MONITORS) {
+                if ((config.WHITELIST && config.CHANNELS.contains(it.message.channel.id)) 
+                    || (!config.WHITELIST && !config.CHANNELS.contains(it.message.channel.id))) {
+                    if (StringSimilarityFinder.findImplementation(KotBot.CONFIG.MESSAGE_MONITOR_MODE)
+                            .containsSimilarString(it.message.content, config.KEY_PHRASES)) {
+                        it.message.reply(buildString { 
+                            appendln("**Based on your question, this seems like an appropriate answer:**\n")
+                            appendln(config.RESPONSE+"\n")
+                            appendln("*Note: This is an automated response. If you feel this is incorrect or you still " +
+                                    "need additional assistance, please contact ${KotBot.OWNER_NAME}.*")
+                        })
+                        return@IListener
+                    }
+                }
+            }
+        })
+    }
+    
+    enum class StringSimilarityFinder(val implementation: NormalizedStringDistance) {
+        NORMALIZED_LEVENSHTEIN(NormalizedLevenshtein()), 
+        JARO_WINKLER(JaroWinkler()), 
+        METRIC_LONGEST_COMMON_SUBSEQUENCE(MetricLCS()), 
+        N_GRAM(NGram()), 
+        COSINE_SIMILARITY(Cosine()), 
+        JACCARD_INDEX(Jaccard()), 
+        SORENSEN_DICE_COEFFICIENT(SorensenDice()),
+        NULL_IMPLEMENTATION(NormalizedStringDistance { string1, string2 -> return@NormalizedStringDistance 1.0 });
+
+        fun containsSimilarString(input: String, possibleMatches: Array<String>): Boolean {
+            for (possibleMatch in possibleMatches) {
+                if (implementation.distance(input, possibleMatch) <= KotBot.CONFIG.MESSAGE_SIMILARITY_CONSTANT)
+                    return true
+            }
+            
+            return false
+        }
+        
+        companion object {
+
+            fun findImplementation(string: String): StringSimilarityFinder {
+                try {
+                    return StringSimilarityFinder.valueOf(string.replace('-', '_').replace(' ', '_').toUpperCase())
+                } catch(e: Exception) {
+                    KotBot.LOGGER.error("Unable to find string similarity implementation for '$string'. Using a null implementation (nothing is similar).")
+                    return NULL_IMPLEMENTATION
+                }
+            }
+        }
     }
 }

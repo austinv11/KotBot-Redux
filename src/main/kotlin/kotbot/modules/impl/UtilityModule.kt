@@ -69,7 +69,7 @@ class UtilityModule : BaseModule() { //TODO: define command
             }
         }
         
-        fun execute(script: String): String? { //TODO: Add support for luaj, jruby, jython, groovy, java and kotlin 
+        fun execute(script: String): String? { //TODO: Add support for luaj, jruby, jython, groovy, java (maybe use javassist?) and kotlin 
             try {
                 val returnVal: String?
                 when (this) {
