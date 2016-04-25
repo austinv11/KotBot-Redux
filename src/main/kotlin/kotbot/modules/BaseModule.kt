@@ -2,6 +2,7 @@ package kotbot.modules
 
 import kotbot.DataBase
 import kotbot.KotBot
+import kotbot.utils.bufferedRequest
 import sx.blah.discord.Discord4J
 import sx.blah.discord.api.Event
 import sx.blah.discord.api.IDiscordClient
@@ -73,19 +74,19 @@ abstract class BaseModule : IModule {
             try {
                 command = commands.filter { it.key.contains(commandName) }.values.firstOrNull()!!.second
             } catch(e: NullPointerException) {
-                event.message.channel.sendMessage(formatErrorMessage("Command `$commandName` not found! Use ${KotBot.CONFIG.PREFIX}help for a list of commands."))
+                bufferedRequest { event.message.channel.sendMessage(formatErrorMessage("Command `$commandName` not found! Use ${KotBot.CONFIG.PREFIX}help for a list of commands.")) }
                 return
             }
 
             if ((!command.directMessages && event.message.channel.isPrivate) ||
                     (!command.channelMessages && !event.message.channel.isPrivate)) {
-                event.message.channel.sendMessage(formatErrorMessage("Command `$commandName` cannot be used here"))
+                bufferedRequest { event.message.channel.sendMessage(formatErrorMessage("Command `$commandName` cannot be used here")) }
                 return
             }
 
             try {
                 if (!hasPermission(event.message.author, command.botPermissionLevel)) {
-                    event.message.channel.sendMessage(formatErrorMessage("${event.message.author.mention()}, you don't have the required permissions for this command. Need: `${command.botPermissionLevel}`!"))
+                    bufferedRequest { event.message.channel.sendMessage(formatErrorMessage("${event.message.author.mention()}, you don't have the required permissions for this command. Need: `${command.botPermissionLevel}`!")) }
                     return
                 }
 
@@ -110,10 +111,10 @@ abstract class BaseModule : IModule {
                         try {
                             val result = command.execute(event.message, generateArgs(args))
                             if (result != null)
-                                event.message.channel.sendMessage(result)
+                                bufferedRequest { event.message.channel.sendMessage(result) }
 
                         } catch(e: Exception) {
-                            event.message.channel.sendMessage(formatErrorMessage(e))
+                            bufferedRequest { event.message.channel.sendMessage(formatErrorMessage(e)) }
                             e.printStackTrace()
                         } finally {
                             if (event.message.channel.typingStatus)
@@ -129,10 +130,10 @@ abstract class BaseModule : IModule {
                     val result = command.execute(event.message, generateArgs(args))
 
                     if (result != null)
-                        event.message.channel.sendMessage(result)
+                        bufferedRequest { event.message.channel.sendMessage(result) }
                 }
             } catch(e: Exception) {
-                event.message.channel.sendMessage(formatErrorMessage(e))
+                bufferedRequest { event.message.channel.sendMessage(formatErrorMessage(e)) }
                 e.printStackTrace()
             }
         }

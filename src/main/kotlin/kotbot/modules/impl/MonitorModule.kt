@@ -7,6 +7,7 @@ import kotbot.modules.BaseModule
 import kotbot.modules.Command
 import kotbot.modules.CommandException
 import kotbot.modules.Parameter
+import kotbot.utils.bufferedRequest
 import sx.blah.discord.api.IListener
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent
 import sx.blah.discord.handle.obj.IMessage
@@ -44,7 +45,7 @@ class MonitorModule : BaseModule() {
                 
                 timer.schedule(object: TimerTask() {
                     override fun run() {
-                        message.channel.sendMessage("Times up! This is a reminder for \"$description\"")
+                        bufferedRequest { message.channel.sendMessage("Times up! This is a reminder for \"$description\"") }
                     }
                 }, unit.toMillis(time))
                 
@@ -69,12 +70,14 @@ class MonitorModule : BaseModule() {
                     || (!config.WHITELIST && !config.CHANNELS.contains(it.message.channel.id))) {
                     if (StringSimilarityFinder.findImplementation(KotBot.CONFIG.MESSAGE_MONITOR_MODE)
                             .containsSimilarString(it.message.content, config.KEY_PHRASES)) {
-                        it.message.reply(buildString { 
-                            appendln("**Based on your question, this seems like an appropriate answer:**\n")
-                            appendln(config.RESPONSE+"\n")
-                            appendln("*Note: This is an automated response. If you feel this is incorrect or you still " +
-                                    "need additional assistance, please contact ${KotBot.OWNER_NAME}.*")
-                        })
+                        bufferedRequest {
+                            it.message.reply(buildString {
+                                appendln("**Based on your question, this seems like an appropriate answer:**\n")
+                                appendln(config.RESPONSE + "\n")
+                                appendln("*Note: This is an automated response. If you feel this is incorrect or you still " +
+                                        "need additional assistance, please contact ${KotBot.OWNER_NAME}.*")
+                            })
+                        }
                         return@IListener
                     }
                 }

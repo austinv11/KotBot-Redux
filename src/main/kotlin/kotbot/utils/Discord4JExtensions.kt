@@ -3,6 +3,7 @@ package kotbot.utils
 import sx.blah.discord.api.Event
 import sx.blah.discord.api.IDiscordClient
 import sx.blah.discord.api.IListener
+import sx.blah.discord.util.RequestBuffer
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -34,4 +35,11 @@ fun <T: Event> Any.waitFor(client: IDiscordClient, handler: (event: T) -> Boolea
  */
 fun <T: Event> Any.waitFor(client: IDiscordClient) : T {
     return this.waitFor<T>(client, { true })
+}
+
+/**
+ * Buffers any requests which may hit a rate limit.
+ */
+fun bufferedRequest(request: () -> Unit) {
+    RequestBuffer.request { request() }
 }

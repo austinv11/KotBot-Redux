@@ -18,7 +18,7 @@ class UtilityModule : BaseModule() { //TODO: define command
                         CommandPermissionLevels.ADMIN) {
                     override fun execute(message: IMessage, args: List<Any>): String? {
                         if (args.size < 1)
-                            throw CommandException("Need a new prefix to swtich to!")
+                            throw CommandException("Need a new prefix to switch to!")
                         
                         KotBot.CONFIG.PREFIX = args[0].toString()
                         KotBot.CONFIG.save()

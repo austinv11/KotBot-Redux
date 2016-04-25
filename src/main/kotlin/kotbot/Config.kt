@@ -35,11 +35,11 @@ class Config {
      * METRIC_LONGEST_COMMON_SUBSEQUENCE, N_GRAM, COSINE_SIMILARITY, JACCARD_INDEX and SORENSEN_DICE_COEFFICIENT.
      * More info available here: https://github.com/tdebatty/java-string-similarity#summary
      */
-    var MESSAGE_MONITOR_MODE = "NORMALIZED_LEVENSHTEIN"
+    var MESSAGE_MONITOR_MODE = "SORENSEN_DICE_COEFFICIENT"
     /**
      * The maximum difference found in two strings.
      */
-    var MESSAGE_SIMILARITY_CONSTANT = .5
+    var MESSAGE_SIMILARITY_CONSTANT = .4
     /**
      * The messages the bot should monitor.
      */
